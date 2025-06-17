@@ -226,7 +226,7 @@ st.set_page_config(layout="centered", page_title="Roadcraft Save Editor", initia
 
 st.title("Roadcraft Save Editor")
 with st.sidebar:
-    st.markdown("Upload and edit your CompleteSave file, usually found at: `%AppData%/Local/Saber/RoadCraftGame/storage/steam/user/<YOUR_STEAM_USER_ID>/Main/save`")
+    st.markdown("Upload and edit your CompleteSave file, usually found at: `%LocalAppData%\\Saber\\RoadCraftGame\\storage\\steam\\user\\<YOUR_STEAM_USER_ID>\\Main\\save`")
     st.markdown("The default steam deck location is: `/home/deck/.local/share/Steam/steamapps/compatdata/2104890/pfx/drive_c/users/steamuser/AppData/Local/Saber/RoadCraftGame/storage/steam/user/<YOUR_STEAM_USER_ID>/Main/save`")
     st.markdown("---")
     st.markdown("The source code for this app is available on [github](https://github.com/cgpavlakos/roadcraft-completesave-streamlit) if you prefer to run locally.")
