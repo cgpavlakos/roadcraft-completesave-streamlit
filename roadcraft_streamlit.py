@@ -23,7 +23,7 @@ ALL_LEVELS_LIST = [
     "rb_map_10_geothermal"
 ]
 
-# List of all trucks to unlock 
+# List of all trucks to unlock
 ALL_TRUCKS_LIST = [
       "aramatsu_bowhead_heavy_dumptruck_new",
       "kronenwerk_l34_dozer_old",
@@ -282,6 +282,13 @@ def load_and_init_session_state(file_content):
                 'concrete_6_idx': 0,
                 'steel_pipes_7_idx': 0
             }
+
+            # --- START NEW CODE ---
+            # Initialize initial_values for hardmodeOptions
+            hardmode_opts = json_data.get('SslValue', {}).get('hardmodeOptions', {})
+            st.session_state.initial_values['hardmodeOptions'] = hardmode_opts.copy()
+            # --- END NEW CODE ---
+
             # Populate initial_values for resources (using the correct keys)
             if 'fobsResources' in json_data.get('SslValue', {}):
                 for map_data in json_data['SslValue']['fobsResources'].values():
@@ -461,7 +468,7 @@ if st.session_state.json_data:
         "Unlock All Trucks",
         value=st.session_state.initial_unlocked_trucks_checkbox_state, # Set default state based on loaded file
         key="unlock_all_trucks_checkbox",
-        help="Checking this will unlock all known trucks in the game. If unchecked, no changes will be made to your available trucks. Aramatsu Bowhead added."
+        help="Checking this will unlock all known trucks in the game. If unchecked, no changes will be made to your available trucks."
     )
 
     # --- Remove Rusty Trucks Checkbox ---
@@ -513,6 +520,58 @@ if st.session_state.json_data:
     col5, col6 = st.columns(2) # Parent columns for Concrete/SP sections
     concrete_value = create_number_input_with_status("Concrete", "concrete_input", "concrete_6_idx", parent_column=col5)
     steel_pipes_value = create_number_input_with_status("Steel Pipes", "steelPipes_input", "steel_pipes_7_idx", parent_column=col6)
+
+
+    # =================================================================
+    # START: NEW CODE BLOCK for Hard Mode UI
+    # =================================================================
+    with st.expander("Hard Mode Settings", False):
+        st.subheader("Hard Mode Tuning")
+
+        # Check if the hardmodeOptions key exists before trying to build the UI
+        hardmode_options = st.session_state.json_data.get("SslValue", {}).get("hardmodeOptions")
+
+        if hardmode_options is not None:
+            # Use columns for a cleaner layout
+            hm_col1, hm_col2 = st.columns(2)
+            
+            with hm_col1:
+                st.markdown("##### On/Off Toggles")
+                # Create toggles for boolean values, getting the current value from the loaded JSON
+                st.toggle('Fuel Consumption', value=hardmode_options.get('fuel', False), key="hardmode_fuel")
+                st.toggle('Terrain Deformation', value=hardmode_options.get('convoyTerrainDeformationEnable', False), key="hardmode_terrain")
+                st.toggle('Realistic Convoys', value=hardmode_options.get('realisticConvoys', False), key="hardmode_convoys")
+                st.toggle('Manual Gearbox', value=hardmode_options.get('gearbox', False), key="hardmode_gearbox")
+
+            with hm_col2:
+                st.markdown("##### Difficulty Tiers (0=Easiest)")
+                # Create sliders for numeric values, getting the current value from the loaded JSON
+                st.slider('Fuel Cost', 1, 3, value=hardmode_options.get('fuelCost', 0), key="hardmode_fuelCost")
+                st.slider('Quarry Zone', 1, 4, value=hardmode_options.get('quarryZones', 0), key="hardmode_quarryZones")
+                st.slider('Bridge Cost', 1, 3, value=hardmode_options.get('bridges', 0), key="hardmode_bridges")
+                st.slider('Vehicle Cost', 1, 4, value=hardmode_options.get('vehicleCost', 0), key="hardmode_vehicleCost")
+                st.slider('Economy Modifiers (Objective Reward)', 1, 3, value=hardmode_options.get('objectiveReward', 0), key="hardmode_objectiveReward")
+                st.slider('Recovery Rules', 0, 5, value=hardmode_options.get('recovery', 0), key="hardmode_recovery")
+        else:
+            # If the section doesn't exist, show a warning and a checkbox to create it
+            st.warning("This save file does not have a `hardmodeOptions` section.")
+            if st.checkbox("Enable and Edit Hard Mode Settings"):
+                # Define the default (easy) settings
+                default_options = {
+                    "fuel": False, "convoyTerrainDeformationEnable": False, "realisticConvoys": False,
+                    "gearbox": False, "fuelCost": 0, "quarryZones": 0, "bridges": 0,
+                    "vehicleCost": 0, "objectiveReward": 0, "recovery": 0
+                }
+                # Add the default section to the JSON data in the session state
+                st.session_state.json_data["SslValue"]["hardmodeOptions"] = default_options
+                st.success("Hard Mode section has been added! The options are now visible above.")
+                # Rerun the script to immediately show the new editing UI
+                st.rerun()
+
+        st.markdown("---") # Visual separator before the save button
+        # =================================================================
+        # END: NEW CODE BLOCK for Hard Mode UI
+        # =================================================================
 
 
 
@@ -600,6 +659,26 @@ if st.session_state.json_data:
                         while len(resources) <= idx:
                             resources.append(0)
                         resources[idx] = current_val
+
+            # =================================================================
+            # START: NEW CODE BLOCK for Applying Hard Mode Changes
+            # =================================================================
+            # Check if hardmode_options exists in the data before trying to save
+            if "hardmodeOptions" in ssl_value_to_modify:
+                # Update the dictionary with the values from the session state of our new widgets
+                ssl_value_to_modify["hardmodeOptions"]["fuel"] = st.session_state.hardmode_fuel
+                ssl_value_to_modify["hardmodeOptions"]["convoyTerrainDeformationEnable"] = st.session_state.hardmode_terrain
+                ssl_value_to_modify["hardmodeOptions"]["realisticConvoys"] = st.session_state.hardmode_convoys
+                ssl_value_to_modify["hardmodeOptions"]["gearbox"] = st.session_state.hardmode_gearbox
+                ssl_value_to_modify["hardmodeOptions"]["fuelCost"] = st.session_state.hardmode_fuelCost
+                ssl_value_to_modify["hardmodeOptions"]["quarryZones"] = st.session_state.hardmode_quarryZones
+                ssl_value_to_modify["hardmodeOptions"]["bridges"] = st.session_state.hardmode_bridges
+                ssl_value_to_modify["hardmodeOptions"]["vehicleCost"] = st.session_state.hardmode_vehicleCost
+                ssl_value_to_modify["hardmodeOptions"]["objectiveReward"] = st.session_state.hardmode_objectiveReward
+                ssl_value_to_modify["hardmodeOptions"]["recovery"] = st.session_state.hardmode_recovery
+            # =================================================================
+            # END: NEW CODE BLOCK for Applying Hard Mode Changes
+            # =================================================================
 
             # Convert modified JSON back to bytes
             decompressed_data_edited = json.dumps(
