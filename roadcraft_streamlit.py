@@ -547,10 +547,10 @@ if st.session_state.json_data:
                 st.markdown("##### Difficulty Tiers (0=Easiest)")
                 # Create sliders for numeric values, getting the current value from the loaded JSON
                 st.slider('Fuel Cost', 1, 3, value=hardmode_options.get('fuelCost', 0), key="hardmode_fuelCost")
-                st.slider('Quarry Zone', 1, 4, value=hardmode_options.get('quarryZones', 0), key="hardmode_quarryZones")
-                st.slider('Bridge Cost', 1, 3, value=hardmode_options.get('bridges', 0), key="hardmode_bridges")
-                st.slider('Vehicle Cost', 1, 4, value=hardmode_options.get('vehicleCost', 0), key="hardmode_vehicleCost")
-                st.slider('Economy Modifiers (Objective Reward)', 1, 3, value=hardmode_options.get('objectiveReward', 0), key="hardmode_objectiveReward")
+                st.slider('Quarry Zone', 0, 4, value=hardmode_options.get('quarryZones', 0), key="hardmode_quarryZones")
+                st.slider('Bridge Cost', 0, 3, value=hardmode_options.get('bridges', 0), key="hardmode_bridges")
+                st.slider('Vehicle Cost', 0, 4, value=hardmode_options.get('vehicleCost', 0), key="hardmode_vehicleCost")
+                st.slider('Economy Modifiers (Objective Reward)', 0, 3, value=hardmode_options.get('objectiveReward', 0), key="hardmode_objectiveReward")
                 st.slider('Recovery Rules', 0, 5, value=hardmode_options.get('recovery', 0), key="hardmode_recovery")
         else:
             # If the section doesn't exist, show a warning and a checkbox to create it
